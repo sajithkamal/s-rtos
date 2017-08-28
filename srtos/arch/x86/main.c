@@ -7,6 +7,5 @@
 int main(void)
 {
 	init_srtos();
-	main_app();
 	
 }
