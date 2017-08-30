@@ -14,7 +14,9 @@ void init_srtos(void)
 	create_sthread( 0, 10, sthread_main );
 
 	__sthread__ *curr_inst  = __scontext.__sthread_head;
+	//TODO make it a loop
 	while( curr_inst ){
+		__scontext.__current = curr_inst;
 		curr_inst->thread(10);
 		curr_inst = curr_inst->next;
 	}
@@ -49,7 +51,11 @@ void* create_sthread( int delay, int priority, thread_entry_t entry )
 	node->thread = entry;
 	node->priority = priority;
 	node->next = NULL;
+	node->stack_copy = NULL;
+	node->stack_size = 0;
+	node->yield_address = NULL;
 	node->run  = 0;	
+	
 	
 	sthread_insert( node );
 	return (void*)node;
