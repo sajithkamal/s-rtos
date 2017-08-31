@@ -1,3 +1,18 @@
+Copyright 2017 sajith kamalnath  sajithkamal@gmail.com
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+
 #ifndef  SRTOS_H
 #define SRTOS_H
 
@@ -33,7 +48,9 @@ typedef struct __sthread_ctx{
 			if(__scontext.__current->stack_size){                               					\
 				void *sp_start = __builtin_frame_address (0) - __scontext.__current->stack_size;  		\
 				memcpy(sp_start, __scontext.__current->stack_copy, __scontext.__current->stack_size ); 		\
-				free(__scontext.__current->stack_copy);                      					\
+				free(__scontext.__current->stack_copy);                                                         \
+				__scontext.__current->stack_size = 0;                    					\
+				goto *__scontext.__current->yield_address;                 					\
 			}}
 			
 #define s_yield() 	{					       								\
@@ -41,9 +58,10 @@ typedef struct __sthread_ctx{
 			void *spl = (void*)&__dummy;                     							\
 			__scontext.__current->stack_size = __builtin_frame_address (0) - spl ;      				\
 			__scontext.__current->stack_copy = (void*)malloc(__scontext.__current->stack_size);     		\
-			memcpy( __scontext.__current->stack_copy, spl, __scontext.__current->stack_size );      					\
+			memcpy( __scontext.__current->stack_copy, spl, __scontext.__current->stack_size );      		\
 		__slabel:							             					\
 			__scontext.__current->yield_address = &&__slabel;}                     					\
+			return; 												\
 
 /* globals */
 extern __sthread_context__ __scontext;
