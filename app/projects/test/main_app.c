@@ -58,7 +58,7 @@ void mythread4( int k )
 	}
 }
 
-void main_app()
+void main_app(int k)
 { 
 	create_sthread( 0, 100, mythread3 );
 	create_sthread( 0, 3, mythread1 );
