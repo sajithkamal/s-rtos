@@ -27,14 +27,19 @@ void sthread_main( int k);
 void init_srtos(void)
 {
 	__scontext.__sthread_head = NULL;
+	static char invoked_main = 0;
 	
-	create_sthread( 0, 10, sthread_main );
+	sthread_main(10);
 
 	while(1){
 		__sthread__ *curr_inst  = __scontext.__sthread_head;
 		while( curr_inst ){
+			curr_inst->wait_count--;
 			__scontext.__current = curr_inst;
-			curr_inst->thread(10);
+			if(curr_inst->wait_count == 0){
+				curr_inst->wait_count = curr_inst->priority;
+				curr_inst->thread(10);
+			}
 			curr_inst = curr_inst->next;
 		}
 	}
@@ -48,10 +53,9 @@ void sthread_insert(__sthread__ *thread_inst )
 		return ;
 	}
 
-	while( curr_inst->next != NULL && 
-		curr_inst->next->priority < thread_inst->priority){
+	while( curr_inst->next != NULL ){
 		
-		curr_inst->next = curr_inst;
+		curr_inst = curr_inst->next;
 	}
 	thread_inst->next = curr_inst->next;
 	curr_inst->next = thread_inst;
@@ -67,7 +71,8 @@ void* create_sthread( int delay, int priority, thread_entry_t entry )
 		return NULL;
 	}
 	node->thread = entry;
-	node->priority = priority;
+	node->priority = priority + 2;
+	node->wait_count = node->priority;
 	node->next = NULL;
 	node->stack_copy = NULL;
 	node->stack_size = 0;

@@ -60,10 +60,9 @@ void mythread4( int k )
 
 void main_app()
 { 
-	create_sthread( 0, 10, mythread1 );
+	create_sthread( 0, 100, mythread3 );
+	create_sthread( 0, 3, mythread1 );
 	create_sthread( 0, 10, mythread2 );
-	create_sthread( 0, 10, mythread3 );
-	create_sthread( 0, 10, mythread4 );
 }
 
 

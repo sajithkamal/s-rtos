@@ -31,6 +31,7 @@ typedef struct _sthread{
         void * stack_copy;
         int    stack_size;
 	void * yield_address;
+	int  wait_count;
         int   priority;
         struct _sthread *next;
 	char run;
@@ -41,9 +42,6 @@ typedef struct __sthread_ctx{
         __sthread__  *__current;
 }__sthread_context__;
 
-/*
-			//	goto *__scontext.__current->yield_address;                 					\
-*/
 
 #define S_THREAD_START  {                                               							\
 			if(__scontext.__current->stack_size){                               					\
@@ -60,9 +58,10 @@ typedef struct __sthread_ctx{
 			__scontext.__current->stack_size = __builtin_frame_address (0) - spl ;      				\
 			__scontext.__current->stack_copy = (void*)malloc(__scontext.__current->stack_size);     		\
 			memcpy( __scontext.__current->stack_copy, spl, __scontext.__current->stack_size );      		\
+			__scontext.__current->yield_address = &&__slabel;                     					\
+			return; 												\
 		__slabel:							             					\
 			__scontext.__current->yield_address = &&__slabel;}                     					\
-			return; 												\
 
 /* globals */
 extern __sthread_context__ __scontext;
