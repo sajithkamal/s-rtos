@@ -24,6 +24,19 @@
  __sthread_context__  __scontext;
 void sthread_main( int k);
 
+__sthread__ *create_sthread_desc(void)
+{
+	__sthread__ *node = (__sthread__*) _salloc(sizeof(__sthread__));
+	node->next  = NULL;
+	node->prev  = NULL;
+	node->yield_address = NULL;
+	node->yield_return  = NULL;
+	node->next_function      = NULL;
+	node->run  = 0;	
+	return node;
+}
+		
+
 void init_srtos(void)
 {
 	__scontext.__sthread_head = NULL;
@@ -63,9 +76,10 @@ void sthread_insert(__sthread__ *thread_inst )
 }
 
 
-void* create_sthread( int delay, int priority, thread_entry_t entry )
+
+void* create_sthread(unsigned char *stack,  int delay, int priority, thread_entry_t entry )
 {
-	__sthread__ *node = (__sthread__*) _salloc(sizeof(__sthread__));
+	__sthread__ *node = create_sthread_desc();
 	if(node == NULL){
 		prints("Unable to create thread\n");
 		return NULL;
@@ -74,7 +88,7 @@ void* create_sthread( int delay, int priority, thread_entry_t entry )
 	node->priority = priority + 2;
 	node->wait_count = node->priority;
 	node->next = NULL;
-	node->stack_copy = NULL;
+	node->stack_copy = stack;
 	node->stack_size = 0;
 	node->yield_address = NULL;
 	node->run  = 0;	
