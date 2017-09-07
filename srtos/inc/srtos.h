@@ -25,6 +25,14 @@
 #define _salloc malloc
 #define prints printf
 
+#define _LABEL3(s) __label##s:
+#define _LABEL2(s) _LABEL3(s)
+#define SMAKE_LABEL() _LABEL2(__LINE__)
+
+
+#define _GLABEL3(s) __label##s
+#define _GLABEL2(s) _GLABEL3(s)
+#define SGET_LABEL() _GLABEL2(__LINE__)
 
 
 typedef void (*thread_entry_t) (int k );
@@ -51,23 +59,6 @@ typedef struct __sthread_ctx{
 
 __sthread__ *create_sthread_desc(void);
 
-/*
-	Get starting address of stack
-	compute the stack size
-	save stack into the current __thread__ objects stack_copy pointer
- 
-	copy the address to jump to the current __thread__ object's yield_Address when the function is called after previous yield.
-	
-	now prepare next pointer for the __thread__ obj to copy stack of the function being called.
-	          if calling this function first time create _thread_ obj
-		  stack_copy pointer = prev pointer + prev stack size;
-
-	update _thread_ obj next and prev pointers  and move to next;
-
-	call function
-		if the called function has yielded
-		return
-*/
 
 /*
 
@@ -119,13 +110,11 @@ __sthread__ *create_sthread_desc(void);
 								retType __var_name  = __func_name(args);                       	\
 								__scontext.__current =   __scontext.__current->prev;		\
 								if( __scontext.__current->next_function->yield_address !=NULL){\
-									__scontext.__current->yield_return = &&__yielding;                     					\
+									__scontext.__current->yield_return = &&__label_yielded;                    					\
 									goto *__scontext.__current->yield_return;                     					\
 								}else{								\
 									__scontext.__current->yield_address = NULL;         \
 								}}
-
-
 
 #define S_THREAD_START()  {					                                              			\
 			if(__scontext.__current->yield_address){                               					\
@@ -133,6 +122,8 @@ __sthread__ *create_sthread_desc(void);
 				memcpy(sp_start, __scontext.__current->stack_copy, __scontext.__current->stack_size ); 		\
 				__scontext.__current->stack_size = 0;                    					\
 				goto *__scontext.__current->yield_address;                 					\
+			__label_yielded:												\
+				return;												\
 			}}
 
 #define S_START_VOID()  {                                              							        \
@@ -144,7 +135,7 @@ __sthread__ *create_sthread_desc(void);
 			}}
 
 
-#define S_FUNCTION_START(retType)													\
+#define S_FUNCTION_START(retType)												\
 			retType __suspend_thread; 					       					\
 			 {                                               							\
 			if(__scontext.__current->yield_address){                               					\
@@ -160,34 +151,27 @@ __sthread__ *create_sthread_desc(void);
 			void *spl = (void*)&__dummy;                     							\
 			__scontext.__current->stack_size = __builtin_frame_address (0) - spl ;      				\
 			memcpy( __scontext.__current->stack_copy, spl, __scontext.__current->stack_size );      		\
-			__scontext.__current->yield_address = &&__slabel;                     					\
-			__scontext.__current->yield_return = &&__yielding;                     					\
-		__yielding: 												\
-			return __suspend_thread; 												\
-		__slabel:							             					\
+			__scontext.__current->yield_address = &&SGET_LABEL();  return __suspend_thread;  SMAKE_LABEL();		\
 			__scontext.__current->yield_address = NULL;}                     					\
+
+
+#define s_yield_void() {													\
+			int __dummy = 10;				       							\
+			void *spl = (void*)&__dummy;                     							\
+			__scontext.__current->stack_size = __builtin_frame_address (0) - spl ;      				\
+			memcpy( __scontext.__current->stack_copy, spl, __scontext.__current->stack_size );      		\
+			__scontext.__current->yield_address = &&SGET_LABEL();  return;  SMAKE_LABEL();				\
+			__scontext.__current->yield_address = NULL;}                     					\
+
 
 #define s_thread_yield(){ 					       								\
 			int __dummy = 10;				       							\
 			void *spl = (void*)&__dummy;                     							\
 			__scontext.__current->stack_size = __builtin_frame_address (0) - spl ;      				\
 			memcpy( __scontext.__current->stack_copy, spl, __scontext.__current->stack_size );      		\
-			__scontext.__current->yield_address = &&__slabel;                     					\
-			__scontext.__current->yield_return = &&__yielding;                     					\
-		__yielding: 												\
-			return; 												\
-		__slabel:							             					\
+			__scontext.__current->yield_address = &&SGET_LABEL();  return;  SMAKE_LABEL();				\
 			__scontext.__current->yield_address = NULL;}                     					\
 
-#define s_yield_void() 	{					       								\
-			int __dummy = 10;				       							\
-			void *spl = (void*)&__dummy;                     							\
-			__scontext.__current->stack_size = __builtin_frame_address (0) - spl ;      				\
-			memcpy( __scontext.__current->stack_copy, spl, __scontext.__current->stack_size );      		\
-			__scontext.__current->yield_address = &&__slabel;                     					\
-			return; 												\
-		__slabel:							             					\
-			__scontext.__current->yield_address = NULL;}                     					\
 /* globals */
 extern __sthread_context__ __scontext;
 

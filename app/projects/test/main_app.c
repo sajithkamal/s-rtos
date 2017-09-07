@@ -21,6 +21,7 @@ S_FUNCTION_START(int);
 	while(1){
 		printf("inside test_fuc= %d\n", val++);
 		s_yield();
+		s_yield();
 	}
 	return a+b;
 }
