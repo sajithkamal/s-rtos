@@ -1,4 +1,4 @@
-#srtos
+##srtos
 This is a minimal rtos (srtos)  implementation for embedded system.
 it deosn't depends on assembly language and not based on a tick interrupt for context siwtch and scheduling.
 **rtos** is designed primarly for   micro controller application programmers who need liitle help from a scheduler.
@@ -8,8 +8,15 @@ it deosn't depends on assembly language and not based on a tick interrupt for co
 **x86 simulation**
    app/projects/test/main_app.c
 
-**Other microcontroler example**
-TODO
+**microcontroler srtos port  examples**
+
+Atmel AT90USB1286  Teensy 2.0 ++
+	Unzip samples/mega-avr/teensy_2.0_++/srtos-atmel.zip
+        Compile the project file using atmel studio 7
+        flash the code using teensy flasher application
+	Connect FTDI cable to uart1
+        TODO
+             Detailed instructions with link to wiki/youtube etc.
 
 ## Motivation
 
