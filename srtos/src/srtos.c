@@ -15,14 +15,14 @@
 */
 
 
-#include<srtos.h>
-#include<srtos.h>
+#include"srtos.h"
 #include<stdio.h>
 #include<stdlib.h>
 
 
  __sthread_context__  __scontext;
 void sthread_main( int k);
+void sthread_insert(__sthread__ *thread_inst );
 
 __sthread__ *create_sthread_desc(void)
 {
@@ -40,7 +40,7 @@ __sthread__ *create_sthread_desc(void)
 void init_srtos(void)
 {
 	__scontext.__sthread_head = NULL;
-	static char invoked_main = 0;
+
 	
 	sthread_main(10);
 
@@ -97,6 +97,22 @@ void* create_sthread(unsigned char *stack,  int delay, int priority, thread_entr
 	sthread_insert( node );
 	return (void*)node;
 } 
+
+int s_delay__(  unsigned int delay_count)
+{
+#ifdef ATMEL_8BIT
+	volatile unsigned int count = delay_count;
+#else
+	unsigned int count = delay_count;
+#endif
+	S_FUNCTION_START(int);
+	
+	while(count){
+		count--;
+		s_yield();
+	}
+	return 0;
+}
 
 void sthread_main( int k)
 {

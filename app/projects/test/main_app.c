@@ -40,7 +40,8 @@ void mythread2( int k )
 {
  S_THREAD_START();
         while(1){
-		printf("My Thread 2\n");
+		printf("My Thread 2 ********************************\n");
+		s_delay(300);
 		s_thread_yield();
 	}
 }
@@ -51,7 +52,6 @@ void mythread3( int k )
  S_THREAD_START();
         while(1){
 		printf("My Thread 3\n");
-		int s;
 		S_FUNCTION( int,s, test_func, 5, 10 ); 
 		s_thread_yield();
 	}
