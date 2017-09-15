@@ -21,8 +21,6 @@
 #include<stdio.h>
 #include<string.h>
 
-//#define ATMEL_8BIT
-#define X86_SIMULATION
 
 #define THREAD_ARG    int __thread_arg
 #define _salloc malloc
@@ -62,7 +60,7 @@ typedef struct __sthread_ctx{
 
 __sthread__ *create_sthread_desc(void);
 
-#ifdef X86_SIMULATION
+#ifdef EMU_X86
 
 #define S_FUNCTION(retType, __var_name, __func_name, args ...) retType __var_name; {\
 								SMAKE_LABEL(); __scontext.__current->yield_address = &&SGET_LABEL();         \
@@ -135,7 +133,7 @@ __scontext.__current->yield_address = NULL;}                     					\
 			
 #endif		// end X_86_SIMULATION	
 
-#ifdef ATMEL_8BIT
+#ifdef AVR_8BIT
 
 #define S_FUNCTION(retType, __var_name, __func_name, args ...) retType __var_name; {\
 	SMAKE_LABEL(); __scontext.__current->yield_address = &&SGET_LABEL();         \
@@ -202,7 +200,7 @@ __scontext.__current->yield_address = NULL;}                     					\
 __scontext.__current->yield_address = NULL;}                     					
 
 
-#endif // end ATMEL_8BIT
+#endif // end AVR_8BIT
 
 #define S_START_VOID()  {                                              							        \
 			if(__scontext.__current->yield_address){                               					\

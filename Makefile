@@ -1,3 +1,15 @@
+cpu = x86
+
+EMU_X86_CFLAGS = -DEMU_X86
+AVR_8BIT_CFLAGS = -DAVR_8BIT
+
+ifeq "$(cpu)" "avr"
+CFLAGS = $(AVR_8BIT_CFLAGS)
+else
+ifeq "$(cpu)" "x86"
+CFLAGS = $(EMU_X86_CFLAGS)
+endif
+endif
 TARGET ?= a.out
 SRC_DIRS ?= ./srtos/arch/x86 ./srtos/inc  ./srtos/src  ./app
 
@@ -13,7 +25,7 @@ LDFLAGs=-m32
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
 $(TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES) $(LDLIBS)
+	$(CC) $(CFLAGS)   $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES) $(LDLIBS)
 
 .PHONY: clean
 clean:
