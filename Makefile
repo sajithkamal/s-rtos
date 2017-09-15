@@ -1,5 +1,5 @@
 TARGET ?= a.out
-SRC_DIRS ?= ./srtos ./app
+SRC_DIRS ?= ./srtos/arch/x86 ./srtos/inc  ./srtos/src  ./app
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
