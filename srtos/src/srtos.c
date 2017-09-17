@@ -15,7 +15,8 @@
 */
 
 
-#include"srtos.h"
+#include "srtos.h"
+#include "skernel.h"
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -24,11 +25,15 @@
 void sthread_main( int k);
 void sthread_insert(__sthread__ *thread_inst );
 
+
+#define MAIN_STACK_SIZE 512
+unsigned char stack_main[MAIN_STACK_SIZE];
+
 __sthread__ *create_sthread_desc(void)
 {
 	__sthread__ *node = (__sthread__*) _salloc(sizeof(__sthread__));
 	node->next  = NULL;
-	node->prev  = NULL;
+	node->prev_function  = NULL;
 	node->yield_address = NULL;
 	node->yield_return  = NULL;
 	node->next_function      = NULL;
@@ -42,7 +47,8 @@ void init_srtos(void)
 	__scontext.__sthread_head = NULL;
 
 	
-	sthread_main(10);
+//	sthread_main(10);
+	create_sthread(stack_main, 0, 100, sthread_main );
 
 	while(1){
 		__sthread__ *curr_inst  = __scontext.__sthread_head;
@@ -73,6 +79,30 @@ void sthread_insert(__sthread__ *thread_inst )
 	thread_inst->next = curr_inst->next;
 	curr_inst->next = thread_inst;
 
+}
+
+void sthread_delete(thread_entry_t entry)
+{
+	__sthread__ *curr_inst  = __scontext.__sthread_head;
+	if(curr_inst == NULL){
+		prints("error deleting: no such threads\n");
+		return ;
+	}else if(curr_inst->thread == entry ){
+		__scontext.__sthread_head = curr_inst->next;
+		_sfree(curr_inst);
+		return;
+	}
+
+	while( curr_inst->next != NULL ){
+			__sthread__ *temp = curr_inst->next;
+			if(temp->thread == entry){
+				curr_inst->next = temp->next;
+				_sfree(temp);	
+				return ;		
+			}	
+		curr_inst = curr_inst->next;
+	}
+	prints("error no such thread to delete\n");
 }
 
 
@@ -116,6 +146,8 @@ int s_delay__(  unsigned int delay_count)
 
 void sthread_main( int k)
 {
+S_THREAD_START();
 	prints("starting main thread\n");
-	main_app(k);
+	S_FUNCTION(int,s,main_app,k);
+	sthread_delete(sthread_main);
 }

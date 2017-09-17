@@ -19,13 +19,11 @@
 
 #include "skernel.h"
 #define s_delay(delay_count) {  S_FUNCTION(int, s , s_delay__, delay_count); s=s;}
-
-/* globals */
-extern __sthread_context__ __scontext;
+#define s_thread_yield  s_yield
 
 
-void main_app( int k );
 void init_srtos(void);
 
 void* create_sthread(unsigned char *stack,  int delay, int priotity, thread_entry_t entry );
+int main_app( int k );
 #endif
