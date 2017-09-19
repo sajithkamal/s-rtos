@@ -69,7 +69,8 @@ __sthread__ *create_sthread_desc(void);
 
 #ifdef EMU_X86
 
-#define S_FUNCTION(retType, __var_name, __func_name, args ...) retType __var_name; {\
+
+#define s_function(__func_name, args ...)( {\
 								SMAKE_LABEL(); __scontext.__current->yield_address = &&SGET_LABEL();\
 								int __func_dummy = 10;\
 								void *__func_spl = (void*)&__func_dummy;\
@@ -86,7 +87,7 @@ __sthread__ *create_sthread_desc(void);
 								__sthread__ *temp = __scontext.__current;\
 								__scontext.__current =	__scontext.__current->next_function;\
 								__scontext.__current->prev_function = temp;\
-								__var_name  = __func_name(args);\
+								 __func_name(args);\
 								__scontext.__current =   __scontext.__current->prev_function;\
 								if( __scontext.__current->next_function->yield_address !=NULL){\
 									goto *__scontext.__current->yield_return;\
@@ -94,11 +95,11 @@ __sthread__ *create_sthread_desc(void);
 									__scontext.__current->yield_address = NULL;\
 									void *sp_start = __builtin_frame_address (0) - __scontext.__current->stack_size;\
 									memcpy(sp_start, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
-								}}
+								}})
 								
 								
 
-#define S_THREAD_START()  { __scontext.__current->yield_return = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return;}else{\
+#define s_thread_params()  { __scontext.__current->yield_return = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return;}else{\
 			if(__scontext.__current->yield_address){\
 				void *sp_start = (char*)__builtin_frame_address (0) - __scontext.__current->stack_size;\
 				memcpy(sp_start, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
@@ -106,7 +107,7 @@ __sthread__ *create_sthread_desc(void);
 				goto *__scontext.__current->yield_address;\
 			}}}
 			
-#define S_FUNCTION_START(retType)\
+#define s_function_params(retType)\
 	retType __suspend_thread; memset(&__suspend_thread, 0, 1);\
 	{__scontext.__current->yield_return = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return __suspend_thread;}else{\
 	if(__scontext.__current->yield_address){\
@@ -131,7 +132,8 @@ __sthread__ *create_sthread_desc(void);
 
 #ifdef AVR_8BIT
 
-#define S_FUNCTION(retType, __var_name, __func_name, args ...) retType __var_name; {\
+
+#define s_function( __func_name, args ...) {\
 	SMAKE_LABEL(); __scontext.__current->yield_address = &&SGET_LABEL();\
 	int __func_dummy = 10;\
 	void *__func_spl = (void*)&__func_dummy;\
@@ -148,7 +150,7 @@ __sthread__ *create_sthread_desc(void);
 	__sthread__ *temp = __scontext.__current;\
 	__scontext.__current =	__scontext.__current->next_function;\
 	__scontext.__current->prev_function = temp;\
-	__var_name  = __func_name(args);\
+	__func_name(args);\
 	__scontext.__current =   __scontext.__current->prev_function;\
 	if( __scontext.__current->next_function->yield_address !=NULL){\
 		goto *__scontext.__current->yield_return;\
@@ -158,7 +160,7 @@ __sthread__ *create_sthread_desc(void);
 	}}
 	
 
-#define S_THREAD_START(){ __scontext.__current->yield_return = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return;}else{\
+#define s_thread_params(){ __scontext.__current->yield_return = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return;}else{\
 	if(__scontext.__current->yield_address){\
 		memcpy(__builtin_frame_address (0) + 1, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
 		__scontext.__current->stack_size = 0;\
@@ -166,7 +168,7 @@ __sthread__ *create_sthread_desc(void);
 	}}}
 	
 	
-#define S_FUNCTION_START(retType)\
+#define s_function_params(retType)\
 	retType __suspend_thread; memset(&__suspend_thread, 0, 1);\
 	{__scontext.__current->yield_return = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return __suspend_thread;}else{\
 		if(__scontext.__current->yield_address){\

@@ -18,7 +18,7 @@
 #define  SRTOS_H
 
 #include "skernel.h"
-#define s_delay(delay_count) {  S_FUNCTION(int, s , s_delay__, delay_count); s=s;}
+#define s_delay(delay_count) {  s_function( s_delay__, delay_count);}
 #define s_thread_yield  s_yield
 
 

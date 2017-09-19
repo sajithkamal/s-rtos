@@ -14,9 +14,18 @@ unsigned char stack_thread5[STACK_SIZE];
 extern unsigned long long get_eip(void);
 extern unsigned long long get_ebp(void);
 
+
+/* Example of non blocking function */
+void regular_function()
+{
+	printf("Simple function called\n");
+}
+
+/* Example of a blocking function called from a thread */
+
 int test_func( int a , int b )
 {
-S_FUNCTION_START(int);
+	s_function_params(int);
 	int val = 0;
 	while(1){
 		printf("inside test_fuc= %d\n", val++);
@@ -26,15 +35,10 @@ S_FUNCTION_START(int);
 	return a+b;
 }
 
-void simple_function()
-{
-	printf("Simple function called\n");
-}
-
 
 void mythread1( int k )
 {
- S_THREAD_START();
+ 	s_thread_params();
         while(1){
 		printf("My Thread 1\n");
 		s_thread_yield();
@@ -44,7 +48,7 @@ void mythread1( int k )
 
 void mythread2( int k )
 {
- S_THREAD_START();
+ 	s_thread_params();
         while(1){
 		printf("My Thread 2 ********************************\n");
 		s_delay(300);
@@ -55,10 +59,10 @@ void mythread2( int k )
 
 void mythread3( int k )
 {
- S_THREAD_START();
+ 	s_thread_params();
         while(1){
 		printf("My Thread 3\n");
-		S_FUNCTION( int,s, test_func, 5, 10 ); 
+		s_function( test_func, 5, 10 );
 		s_thread_yield();
 	}
 }
@@ -66,10 +70,10 @@ void mythread3( int k )
 
 void mythread4( int k )
 {
- S_THREAD_START();
+ 	s_thread_params();
         while(1){
 		printf("My Thread 4\n");
-		simple_function();
+		regular_function();
 		s_thread_yield();
 	}
 }
@@ -77,7 +81,7 @@ void mythread4( int k )
 
 void mythread5( int k )
 {
- S_THREAD_START();
+ 	s_thread_params();
         while(1){
 		printf("My Thread 5\n");
 		s_thread_yield();
@@ -86,7 +90,7 @@ void mythread5( int k )
 
 int main_app(int k)
 {
-S_FUNCTION_START(int); 
+	s_function_params(int); 
 	create_sthread(stack_thread3, 0, 100, mythread3 );
 	create_sthread(stack_thread1, 0, 3, mythread1 );
 	create_sthread(stack_thread2, 0, 10, mythread2 );

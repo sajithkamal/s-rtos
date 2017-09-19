@@ -1,6 +1,11 @@
 #srtos
-This is a simple real time operating system (RTOS) for small foot print micro-controllers.
-**features** includes setting thread priority, synchronisation objects  and power management. 
+This is a simple multitasking OS for small foot print micro-controllers.
+**features** includes setting thread priority, synchronisation objects  and power management.
+
+##Target audience
+ Those who write bare metal code but still need little help from a scheduler. 
+ 
+ 
 
 ## Code Example
 **x86 simulation**
@@ -15,9 +20,8 @@ samples/mega-avr/teensy_2.0_++/srtos-atmel.zip.
 TODO
 
 ## Motivation
+Created this soltuion couple of years ago to do  multitasking for 8bit microcontroller based  hobby projects.
 
-Often thought that it is desirable to have an RTOS with minimal over head to setup,  when developing small low footprint microcontroller programs.
-The idea is to include 2-3 files to your makefile and it should be ready to go.  
 
 ## HOWTO 
 
@@ -25,7 +29,6 @@ The idea is to include 2-3 files to your makefile and it should be ready to go.
 Instructions (Tested in Ubuntu and Mac )
 1. git clone https://github.com/sajithkamal/s-rtos.git
 2. make
-3 ./a.out
 
 
 Atmel AT90USB1286  Teensy 2.0 ++

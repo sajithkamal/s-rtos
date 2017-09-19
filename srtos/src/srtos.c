@@ -47,7 +47,6 @@ void init_srtos(void)
 	__scontext.__sthread_head = NULL;
 
 	
-//	sthread_main(10);
 	create_sthread(stack_main, 0, 100, sthread_main );
 
 	while(1){
@@ -135,7 +134,7 @@ int s_delay__(  unsigned int delay_count)
 #else
 	unsigned int count = delay_count;
 #endif
-	S_FUNCTION_START(int);
+	s_function_params(int);
 	
 	while(count){
 		count--;
@@ -146,8 +145,8 @@ int s_delay__(  unsigned int delay_count)
 
 void sthread_main( int k)
 {
-S_THREAD_START();
+s_thread_params();
 	prints("starting main thread\n");
-	S_FUNCTION(int,s,main_app,k);
+	s_function(main_app,k);
 	sthread_delete(sthread_main);
 }
