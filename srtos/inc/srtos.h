@@ -19,11 +19,12 @@
 
 #include "skernel.h"
 #define s_delay(delay_count) {  s_function( s_delay__, delay_count);}
+#define s_mutex_lock(mutex_ptr, timeout, ret_ptr) s_mutex_lock__(mutex_ptr, timeout, ret_ptr );
 #define s_thread_yield  s_yield
 
 
 void init_srtos(void);
 
 void* create_sthread(unsigned char *stack,  int delay, int priotity, thread_entry_t entry );
-int main_app( int k );
+void main_app( int k );
 #endif

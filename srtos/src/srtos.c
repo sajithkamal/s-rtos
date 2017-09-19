@@ -34,8 +34,8 @@ __sthread__ *create_sthread_desc(void)
 	__sthread__ *node = (__sthread__*) _salloc(sizeof(__sthread__));
 	node->next  = NULL;
 	node->prev_function  = NULL;
-	node->yield_address = NULL;
-	node->yield_return  = NULL;
+	node->context_continue = NULL;
+	node->context_switch  = NULL;
 	node->next_function      = NULL;
 	node->run  = 0;	
 	return node;
@@ -119,33 +119,46 @@ void* create_sthread(unsigned char *stack,  int delay, int priority, thread_entr
 	node->next = NULL;
 	node->stack_copy = stack;
 	node->stack_size = 0;
-	node->yield_address = NULL;
+	node->context_continue = NULL;
 	node->run  = 0;	
 	
 	
 	sthread_insert( node );
 	return (void*)node;
-} 
+}
 
-int s_delay__(  unsigned int delay_count)
+void  s_mutex_lock__(struct s_mutex *mutex, int timeout, int *ret )
+{
+	//TODO Only thread that locked should be able to unlcok it
+	s_function_params();
+	
+	while(mutex->lock){
+		s_yield();
+	}
+	//TODO handle other threads trying to lock and unlcok
+	mutex->lock = 1;
+	*ret = 0;
+}
+
+
+void s_delay__(  unsigned int delay_count)
 {
 #ifdef ATMEL_8BIT
 	volatile unsigned int count = delay_count;
 #else
 	unsigned int count = delay_count;
 #endif
-	s_function_params(int);
+	s_function_params();
 	
 	while(count){
 		count--;
 		s_yield();
 	}
-	return 0;
 }
 
 void sthread_main( int k)
 {
-s_thread_params();
+	s_thread_params();
 	prints("starting main thread\n");
 	s_function(main_app,k);
 	sthread_delete(sthread_main);

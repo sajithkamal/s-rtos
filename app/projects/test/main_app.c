@@ -18,21 +18,20 @@ extern unsigned long long get_ebp(void);
 /* Example of non blocking function */
 void regular_function()
 {
-	printf("Simple function called\n");
+	printf("regular function called\n");
 }
 
 /* Example of a blocking function called from a thread */
 
-int test_func( int a , int b )
+void  test_func( int a , int b )
 {
-	s_function_params(int);
+	s_function_params();
 	int val = 0;
 	while(1){
 		printf("inside test_fuc= %d\n", val++);
 		s_yield();
 		s_yield();
 	}
-	return a+b;
 }
 
 
@@ -40,7 +39,8 @@ void mythread1( int k )
 {
  	s_thread_params();
         while(1){
-		printf("My Thread 1\n");
+		
+		printf("My Thread 1 ....\n");
 		s_thread_yield();
 	}
 }
@@ -88,9 +88,9 @@ void mythread5( int k )
 	}
 }
 
-int main_app(int k)
+void main_app(int k)
 {
-	s_function_params(int); 
+	s_function_params(); 
 	create_sthread(stack_thread3, 0, 100, mythread3 );
 	create_sthread(stack_thread1, 0, 3, mythread1 );
 	create_sthread(stack_thread2, 0, 10, mythread2 );
