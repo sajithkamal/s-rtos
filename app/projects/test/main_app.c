@@ -14,6 +14,9 @@ unsigned char stack_thread5[STACK_SIZE];
 extern unsigned long long get_eip(void);
 extern unsigned long long get_ebp(void);
 
+/* global variable to test mutex */
+static int m_counter;
+static struct s_mutex my_mutex;
 
 /* Example of non blocking function */
 void regular_function()
@@ -32,6 +35,20 @@ void  test_func( int a , int b )
 		s_yield();
 		s_yield();
 	}
+}
+
+void test_mutex(void)
+{
+	s_function_params();
+
+	s_mutex_lock(&my_mutex, 1000, NULL);
+	printf("Mutex Locked\n");
+	m_counter = 0;
+	while(m_counter++ < 50){
+		s_yield();
+	}	
+	printf("UNLOCKED Mutex\n");
+	s_mutex_unlock(&my_mutex);
 }
 
 
@@ -72,8 +89,10 @@ void mythread4( int k )
 {
  	s_thread_params();
         while(1){
-		printf("My Thread 4\n");
-		regular_function();
+		printf("My Thread 4  44444444444444444444444444444444444444444444444444444444444444\n");
+		//regular_function();
+		
+		s_function(test_mutex);
 		s_thread_yield();
 	}
 }
@@ -82,8 +101,10 @@ void mythread4( int k )
 void mythread5( int k )
 {
  	s_thread_params();
+	s_mutex_init(&my_mutex);
         while(1){
-		printf("My Thread 5\n");
+		printf("My Thread 5  5555555555555555555555555555555555555555555555555555555555555555\n");
+		s_function(test_mutex);
 		s_thread_yield();
 	}
 }
@@ -92,8 +113,8 @@ void main_app(int k)
 {
 	s_function_params(); 
 	create_sthread(stack_thread3, 0, 100, mythread3 );
-	create_sthread(stack_thread1, 0, 3, mythread1 );
-	create_sthread(stack_thread2, 0, 10, mythread2 );
+	create_sthread(stack_thread1, 0, 10, mythread1 );
+	create_sthread(stack_thread2, 0, 20, mythread2 );
 	create_sthread(stack_thread4, 0, 60, mythread4 );
 	create_sthread(stack_thread5, 0, 40, mythread5 );
 	while(1){

@@ -127,19 +127,37 @@ void* create_sthread(unsigned char *stack,  int delay, int priority, thread_entr
 	return (void*)node;
 }
 
+void s_mutex_init( struct s_mutex *mutex )
+{
+	mutex->lock = 0;
+	mutex->thread_id = NULL;
+}
+
 void  s_mutex_lock__(struct s_mutex *mutex, int timeout, int *ret )
 {
 	//TODO Only thread that locked should be able to unlcok it
+	//TODO irq_save ???
 	s_function_params();
-	
+
 	while(mutex->lock){
 		s_yield();
 	}
-	//TODO handle other threads trying to lock and unlcok
 	mutex->lock = 1;
-	*ret = 0;
+	mutex->thread_id =(void*) __scontext.__current->thread;
+	if(ret){
+		*ret = 0;
+	}
 }
 
+int s_mutex_unlock(struct s_mutex *mutex)
+{
+	if(mutex->thread_id == (void*)__scontext.__current->thread){
+		mutex->lock = 0;
+		return 0;
+	}
+	//TODO return error code
+	return -1;
+}
 
 void s_delay__(  unsigned int delay_count)
 {

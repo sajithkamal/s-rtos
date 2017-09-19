@@ -59,6 +59,7 @@ typedef struct __sthread_ctx{
 
 struct s_mutex{
 	char lock;
+	void *thread_id;
 };
 
 
@@ -82,6 +83,7 @@ __sthread__ *create_sthread_desc(void);
 										prints("error unable to create desc\n");\
 									}\
 									__scontext.__current->next_function->stack_copy =  __scontext.__current->stack_copy + __scontext.__current->stack_size;\
+									__scontext.__current->next_function->thread =  __scontext.__current->thread;\
 									__scontext.__current->next_function->context_continue = NULL;\
 								}\
 								__sthread__ *temp = __scontext.__current;\
@@ -142,6 +144,7 @@ __sthread__ *create_sthread_desc(void);
 			prints("error unable to create desc\n");\
 		}\
 		__scontext.__current->next_function->stack_copy =  __scontext.__current->stack_copy + __scontext.__current->stack_size;\
+		__scontext.__current->next_function->thread =  __scontext.__current->thread;\
 		__scontext.__current->next_function->context_continue = NULL;\
 	}\
 	__sthread__ *temp = __scontext.__current;\

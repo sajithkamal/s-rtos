@@ -19,7 +19,9 @@
 
 #include "skernel.h"
 #define s_delay(delay_count) {  s_function( s_delay__, delay_count);}
-#define s_mutex_lock(mutex_ptr, timeout, ret_ptr) s_mutex_lock__(mutex_ptr, timeout, ret_ptr );
+void s_mutex_init( struct s_mutex *mutex );
+int s_mutex_unlock(struct s_mutex *mutex);
+#define s_mutex_lock(mutex_ptr, timeout, ret_ptr) {s_function(s_mutex_lock__, mutex_ptr, timeout, ret_ptr );}
 #define s_thread_yield  s_yield
 
 
