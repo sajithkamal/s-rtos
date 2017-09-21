@@ -21,6 +21,9 @@
 #include<stdio.h>
 #include<string.h>
 
+#define E_ERROR   -1;
+#define E_TIMEOUT -2;
+
 
 #define _salloc malloc
 #define _sfree free
@@ -36,7 +39,9 @@
 #define SGET_LABEL() _GLABEL2(__LINE__)
 
 
+
 typedef void (*thread_entry_t) (int k );
+
 
 typedef struct _sthread{
         thread_entry_t thread;
@@ -46,6 +51,7 @@ typedef struct _sthread{
 	void * context_switch;
 	int  wait_count;
         int   priority;
+	struct _s_ref *ref;	
         struct _sthread *next;
         struct _sthread *prev_function;
         struct _sthread *next_function;
@@ -71,13 +77,16 @@ __sthread__ *create_sthread_desc(void);
 #ifdef EMU_X86
 
 
+								
 #define s_function(__func_name, args ...)( {\
 								SMAKE_LABEL(); __scontext.__current->context_continue = &&SGET_LABEL();\
 								int __func_dummy = 10;\
 								void *__func_spl = (void*)&__func_dummy;\
 								__scontext.__current->stack_size = __builtin_frame_address (0) - __func_spl ;\
-								memcpy( __scontext.__current->stack_copy, __func_spl, __scontext.__current->stack_size );\
-								  if(__scontext.__current->next_function == NULL){\
+								if(!__scontext.__current->stack_copy){\
+									memcpy( __scontext.__current->stack_copy, __func_spl, __scontext.__current->stack_size );\
+								}\
+								if(__scontext.__current->next_function == NULL){\
 									__scontext.__current->next_function =  create_sthread_desc();\
 									if(__scontext.__current->next_function == NULL){\
 										prints("error unable to create desc\n");\
@@ -92,14 +101,11 @@ __sthread__ *create_sthread_desc(void);
 								 __func_name(args);\
 								__scontext.__current =   __scontext.__current->prev_function;\
 								if( __scontext.__current->next_function->context_continue !=NULL){\
+									memcpy( __scontext.__current->stack_copy, __func_spl, __scontext.__current->stack_size );\
 									goto *__scontext.__current->context_switch;\
 								}else{\
 									__scontext.__current->context_continue = NULL;\
-									void *sp_start = __builtin_frame_address (0) - __scontext.__current->stack_size;\
-									memcpy(sp_start, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
 								}})
-								
-								
 
 #define s_thread_params()  { __scontext.__current->context_switch = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return;}else{\
 			if(__scontext.__current->context_continue){\
@@ -137,7 +143,9 @@ __sthread__ *create_sthread_desc(void);
 	int __func_dummy = 10;\
 	void *__func_spl = (void*)&__func_dummy;\
 	__scontext.__current->stack_size = __func_spl - __builtin_frame_address (0) - 1 ;\
-	memcpy( __scontext.__current->stack_copy, __builtin_frame_address (0) + 1, __scontext.__current->stack_size );\
+	if(!__scontext.__current->stack_copy){\
+		memcpy( __scontext.__current->stack_copy, __builtin_frame_address (0) + 1, __scontext.__current->stack_size );\
+	}\
 	if(__scontext.__current->next_function == NULL){\
 		__scontext.__current->next_function =  create_sthread_desc();\
 		if(__scontext.__current->next_function == NULL){\
@@ -153,10 +161,10 @@ __sthread__ *create_sthread_desc(void);
 	__func_name(args);\
 	__scontext.__current =   __scontext.__current->prev_function;\
 	if( __scontext.__current->next_function->context_continue !=NULL){\
+		memcpy( __scontext.__current->stack_copy, __builtin_frame_address (0) + 1, __scontext.__current->stack_size );\
 		goto *__scontext.__current->context_switch;\
 		}else{\
 		__scontext.__current->context_continue = NULL;\
-		memcpy(__builtin_frame_address (0) + 1, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
 	}}
 	
 
@@ -187,6 +195,5 @@ __sthread__ *create_sthread_desc(void);
 
 
 void s_delay__( unsigned int  delay_count);
-void  s_mutex_lock__(struct s_mutex *mutex, int timeout, int *ret );
-
+void  s_mutex_lock__(struct s_mutex *mutex, int timeout,  int* ret );
 #endif

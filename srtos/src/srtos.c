@@ -126,6 +126,16 @@ void* create_sthread(unsigned char *stack,  int delay, int priority, thread_entr
 	sthread_insert( node );
 	return (void*)node;
 }
+	
+
+unsigned int s_get_ticks(void)
+{
+	/* No timer setup yet */
+
+	static unsigned int ticks = 0;
+	ticks++;
+	return ticks;
+}
 
 void s_mutex_init( struct s_mutex *mutex )
 {
@@ -133,20 +143,36 @@ void s_mutex_init( struct s_mutex *mutex )
 	mutex->thread_id = NULL;
 }
 
-void  s_mutex_lock__(struct s_mutex *mutex, int timeout, int *ret )
+void  s_mutex_lock__(struct s_mutex *mutex, int timeout, int* ret )
 {
 	//TODO Only thread that locked should be able to unlcok it
 	//TODO irq_save ???
-	s_function_params();
+	s_thread_params();
+	
 
 	while(mutex->lock){
+		if(timeout > 0){
+			unsigned int current_ticks = s_get_ticks();
+			while(current_ticks == s_get_ticks()){
+				s_yield();
+			}
+			if( --timeout == 0){
+				if(ret){
+					*ret = E_TIMEOUT;
+					return;
+				}
+			}
+		}
+		//TODO we can move this s_yield in else {} 
+		//  when actual timer tick is implemented
 		s_yield();
 	}
 	mutex->lock = 1;
-	mutex->thread_id =(void*) __scontext.__current->thread;
+	mutex->thread_id = (void*)__scontext.__current->thread;
 	if(ret){
 		*ret = 0;
 	}
+	//s_yield();
 }
 
 int s_mutex_unlock(struct s_mutex *mutex)
@@ -166,7 +192,7 @@ void s_delay__(  unsigned int delay_count)
 #else
 	unsigned int count = delay_count;
 #endif
-	s_function_params();
+	s_thread_params();
 	
 	while(count){
 		count--;

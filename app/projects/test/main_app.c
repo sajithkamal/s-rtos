@@ -3,7 +3,7 @@
 #include<stdlib.h>
 #include<string.h>
 
-#define STACK_SIZE 512
+#define STACK_SIZE 128
 
 unsigned char stack_thread1[STACK_SIZE];
 unsigned char stack_thread2[STACK_SIZE];
@@ -28,8 +28,8 @@ void regular_function()
 
 void  test_func( int a , int b )
 {
-	s_function_params();
-	int val = 0;
+	s_thread_params();
+	volatile int val = 0;
 	while(1){
 		printf("inside test_fuc= %d\n", val++);
 		s_yield();
@@ -37,27 +37,40 @@ void  test_func( int a , int b )
 	}
 }
 
+void pass( int *ret )
+{
+ 	s_thread_params();
+	*ret = 100;
+	s_yield();
+}
+
 void test_mutex(void)
 {
-	s_function_params();
+	s_thread_params();
+	static int  ret = 30;
 
-	s_mutex_lock(&my_mutex, 1000, NULL);
-	printf("Mutex Locked\n");
+	int *p   = &ret;
+	s_mutex_lock(&my_mutex, 1000, p);
+	printf("Mutex Locked =  %d\n", *p);
 	m_counter = 0;
 	while(m_counter++ < 50){
 		s_yield();
 	}	
-	printf("UNLOCKED Mutex\n");
-	s_mutex_unlock(&my_mutex);
+	int a = s_mutex_unlock(&my_mutex);
+	printf("UNLOCKED Mutex = %d\n", a);
 }
+
 
 
 void mythread1( int k )
 {
  	s_thread_params();
+	
+	int val = 69;
+
         while(1){
-		
-		printf("My Thread 1 ....\n");
+		s_function(pass, &val);
+		printf("My Thread 1 ....= %d\n", val);
 		s_thread_yield();
 	}
 }
@@ -111,17 +124,16 @@ void mythread5( int k )
 
 void main_app(int k)
 {
-	s_function_params(); 
+	s_thread_params(); 
 	create_sthread(stack_thread3, 0, 100, mythread3 );
 	create_sthread(stack_thread1, 0, 10, mythread1 );
 	create_sthread(stack_thread2, 0, 20, mythread2 );
 	create_sthread(stack_thread4, 0, 60, mythread4 );
 	create_sthread(stack_thread5, 0, 40, mythread5 );
 	while(1){
-		printf("hello main loop\n");
+		//printf("hello main loop\n");
 		s_yield();
 	}
-
 }
 
 
