@@ -172,7 +172,6 @@ void  s_mutex_lock__(struct s_mutex *mutex, int timeout, int* ret )
 	if(ret){
 		*ret = 0;
 	}
-	//s_yield();
 }
 
 int s_mutex_unlock(struct s_mutex *mutex)
@@ -184,6 +183,48 @@ int s_mutex_unlock(struct s_mutex *mutex)
 	//TODO return error code
 	return -1;
 }
+
+void s_sem_init(struct s_semaphore *sem, int max_count)
+{
+	sem->count = 0;
+	sem->max_count = max_count;
+}
+
+void s_sem_take__( struct s_semaphore *sem, int timeout, int *ret )
+{
+	s_thread_params();
+	while(sem->count == 0){
+		if(timeout > 0){
+			unsigned int current_ticks = s_get_ticks();
+			while(current_ticks == s_get_ticks()){
+				s_yield();
+			}
+			if( --timeout == 0){
+				if(ret){
+					*ret = E_TIMEOUT;
+					return;
+				}
+			}
+		}
+		s_yield();
+	}
+	if(sem->count){
+		sem->count--;
+	}
+
+	if(ret){
+		*ret = 0;
+	}
+}
+
+int  s_sem_give( struct s_semaphore *sem )
+{
+	if(sem->count >= sem->max_count){
+		return E_MAX;
+	}
+	sem->count++;
+	return 0;
+} 
 
 void s_delay__(  unsigned int delay_count)
 {

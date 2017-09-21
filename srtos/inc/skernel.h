@@ -21,8 +21,12 @@
 #include<stdio.h>
 #include<string.h>
 
+#define S_FOREVER -1
+
+/* Error code */
 #define E_ERROR   -1;
 #define E_TIMEOUT -2;
+#define E_MAX     -3
 
 
 #define _salloc malloc
@@ -64,8 +68,13 @@ typedef struct __sthread_ctx{
 }__sthread_context__;
 
 struct s_mutex{
-	char lock;
+	volatile char lock;
 	void *thread_id;
+};
+
+struct s_semaphore{
+	volatile int count;
+	int max_count;
 };
 
 
@@ -196,4 +205,5 @@ __sthread__ *create_sthread_desc(void);
 
 void s_delay__( unsigned int  delay_count);
 void  s_mutex_lock__(struct s_mutex *mutex, int timeout,  int* ret );
+void s_sem_take__( struct s_semaphore *sem, int timeout, int *ret );
 #endif

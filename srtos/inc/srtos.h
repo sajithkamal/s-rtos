@@ -18,15 +18,30 @@
 #define  SRTOS_H
 
 #include "skernel.h"
+/***********************************
+ * The cooperative kernel APIs 
+ ***********************************/
+
+
+/* DELAY  :- just decrement count */
 #define s_delay(delay_count) {  s_function( s_delay__, delay_count);}
+
+/* Mutex */
 void s_mutex_init( struct s_mutex *mutex );
 int s_mutex_unlock(struct s_mutex *mutex);
 #define s_mutex_lock(mutex_ptr, timeout, ret_ptr) {s_function(s_mutex_lock__, mutex_ptr, timeout, ret_ptr );}
+
+/* Semaphore */
+void s_sem_init(struct s_semaphore *sem, int max_count);
+#define s_sem_take( sem_ptr, timeout, ret_ptr) {s_function(s_sem_take__, sem_ptr, timeout, ret_ptr);}
+int s_sem_give( struct s_semaphore *sem );
+
+/* yield() */
+
 #define s_thread_yield  s_yield
 
 
 void init_srtos(void);
-
 void* create_sthread(unsigned char *stack,  int delay, int priotity, thread_entry_t entry );
 void main_app( int k );
 #endif
