@@ -43,7 +43,49 @@
 #define SGET_LABEL() _GLABEL2(__LINE__)
 
 
+								
+#define s_function(__func_name, args ...)( {\
+								SMAKE_LABEL(); __scontext.__current->context_continue = &&SGET_LABEL();\
+								s_get_stack_size();\
+								if(!__scontext.__current->stack_copy){\
+									s_restore_stack();\
+								}\
+								if(__scontext.__current->next_function == NULL){\
+									__scontext.__current->next_function =  create_sthread_desc();\
+									if(__scontext.__current->next_function == NULL){\
+										prints("error unable to create desc\n");\
+									}\
+									__scontext.__current->next_function->stack_copy =  __scontext.__current->stack_copy + __scontext.__current->stack_size;\
+									__scontext.__current->next_function->thread =  __scontext.__current->thread;\
+									__scontext.__current->next_function->context_continue = NULL;\
+								}\
+								__sthread__ *temp = __scontext.__current;\
+								__scontext.__current =	__scontext.__current->next_function;\
+								__scontext.__current->prev_function = temp;\
+								 __func_name(args);\
+								__scontext.__current =   __scontext.__current->prev_function;\
+								if( __scontext.__current->next_function->context_continue !=NULL){\
+									s_restore_stack();\
+									goto *__scontext.__current->context_switch;\
+								}else{\
+									__scontext.__current->context_continue = NULL;\
+								}})
 
+#define s_thread_params()  { __scontext.__current->context_switch = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return;}else{\
+			if(__scontext.__current->context_continue){\
+				s_save_stack();\
+				__scontext.__current->stack_size = 0;\
+				goto *__scontext.__current->context_continue;\
+			}}}
+
+	
+#define s_yield() {\
+		s_get_stack_size();\
+		s_restore_stack();\
+		__scontext.__current->context_continue = &&SGET_LABEL();   goto *__scontext.__current->context_switch;  SMAKE_LABEL();\
+	__scontext.__current->context_continue = NULL;}
+
+			
 typedef void (*thread_entry_t) (int k );
 
 
@@ -77,132 +119,35 @@ struct s_semaphore{
 	int max_count;
 };
 
+/* Platform specific */
 
-/* globals */
-extern __sthread_context__ __scontext;
+#ifdef AVR_8BIT
+#define s_get_stack_size()	int __func_dummy = 10;\
+				void *__func_spl = (void*)&__func_dummy;\
+				__scontext.__current->stack_size = __func_spl - __builtin_frame_address (0) - 1 ;\
 
-__sthread__ *create_sthread_desc(void);
+#define s_restore_stack()	memcpy(__builtin_frame_address (0) + 1, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
+
+#define s_save_stack()	memcpy( __scontext.__current->stack_copy, __builtin_frame_address (0) + 1, __scontext.__current->stack_size );
+
+#endif   // end AVR_8BIT
 
 #ifdef EMU_X86
 
+#define s_get_stack_size()	int __func_dummy = 10;\
+			void *__func_spl = (void*)&__func_dummy;\
+ 			__scontext.__current->stack_size = __builtin_frame_address (0) - __func_spl ;
 
-								
-#define s_function(__func_name, args ...)( {\
-								SMAKE_LABEL(); __scontext.__current->context_continue = &&SGET_LABEL();\
-								int __func_dummy = 10;\
-								void *__func_spl = (void*)&__func_dummy;\
-								__scontext.__current->stack_size = __builtin_frame_address (0) - __func_spl ;\
-								if(!__scontext.__current->stack_copy){\
-									memcpy( __scontext.__current->stack_copy, __func_spl, __scontext.__current->stack_size );\
-								}\
-								if(__scontext.__current->next_function == NULL){\
-									__scontext.__current->next_function =  create_sthread_desc();\
-									if(__scontext.__current->next_function == NULL){\
-										prints("error unable to create desc\n");\
-									}\
-									__scontext.__current->next_function->stack_copy =  __scontext.__current->stack_copy + __scontext.__current->stack_size;\
-									__scontext.__current->next_function->thread =  __scontext.__current->thread;\
-									__scontext.__current->next_function->context_continue = NULL;\
-								}\
-								__sthread__ *temp = __scontext.__current;\
-								__scontext.__current =	__scontext.__current->next_function;\
-								__scontext.__current->prev_function = temp;\
-								 __func_name(args);\
-								__scontext.__current =   __scontext.__current->prev_function;\
-								if( __scontext.__current->next_function->context_continue !=NULL){\
-									memcpy( __scontext.__current->stack_copy, __func_spl, __scontext.__current->stack_size );\
-									goto *__scontext.__current->context_switch;\
-								}else{\
-									__scontext.__current->context_continue = NULL;\
-								}})
+#define s_restore_stack() memcpy( __scontext.__current->stack_copy, __func_spl, __scontext.__current->stack_size );\
 
-#define s_thread_params()  { __scontext.__current->context_switch = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return;}else{\
-			if(__scontext.__current->context_continue){\
-				void *sp_start = (char*)__builtin_frame_address (0) - __scontext.__current->stack_size;\
-				memcpy(sp_start, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
-				__scontext.__current->stack_size = 0;\
-				goto *__scontext.__current->context_continue;\
-			}}}
-
-#define s_function_params()  { __scontext.__current->context_switch = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return;}else{\
-			if(__scontext.__current->context_continue){\
-				void *sp_start = (char*)__builtin_frame_address (0) - __scontext.__current->stack_size;\
-				memcpy(sp_start, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
-				__scontext.__current->stack_size = 0;\
-				goto *__scontext.__current->context_continue;\
-			}}}
-			
-	
-#define s_yield() {\
-		int __dummy = 10;\
-		void *spl = (void*)&__dummy;\
-		__scontext.__current->stack_size = __builtin_frame_address (0) - spl ;\
-		memcpy( __scontext.__current->stack_copy, spl, __scontext.__current->stack_size );\
-		__scontext.__current->context_continue = &&SGET_LABEL();   goto *__scontext.__current->context_switch;  SMAKE_LABEL();\
-	__scontext.__current->context_continue = NULL;}
-
-			
+#define s_save_stack() void *sp_start = (char*)__builtin_frame_address (0) - __scontext.__current->stack_size;\
+			memcpy(sp_start, __scontext.__current->stack_copy, __scontext.__current->stack_size );
 #endif		// end X_86_SIMULATION	
 
-#ifdef AVR_8BIT
 
-
-#define s_function( __func_name, args ...) {\
-	SMAKE_LABEL(); __scontext.__current->context_continue = &&SGET_LABEL();\
-	int __func_dummy = 10;\
-	void *__func_spl = (void*)&__func_dummy;\
-	__scontext.__current->stack_size = __func_spl - __builtin_frame_address (0) - 1 ;\
-	if(!__scontext.__current->stack_copy){\
-		memcpy( __scontext.__current->stack_copy, __builtin_frame_address (0) + 1, __scontext.__current->stack_size );\
-	}\
-	if(__scontext.__current->next_function == NULL){\
-		__scontext.__current->next_function =  create_sthread_desc();\
-		if(__scontext.__current->next_function == NULL){\
-			prints("error unable to create desc\n");\
-		}\
-		__scontext.__current->next_function->stack_copy =  __scontext.__current->stack_copy + __scontext.__current->stack_size;\
-		__scontext.__current->next_function->thread =  __scontext.__current->thread;\
-		__scontext.__current->next_function->context_continue = NULL;\
-	}\
-	__sthread__ *temp = __scontext.__current;\
-	__scontext.__current =	__scontext.__current->next_function;\
-	__scontext.__current->prev_function = temp;\
-	__func_name(args);\
-	__scontext.__current =   __scontext.__current->prev_function;\
-	if( __scontext.__current->next_function->context_continue !=NULL){\
-		memcpy( __scontext.__current->stack_copy, __builtin_frame_address (0) + 1, __scontext.__current->stack_size );\
-		goto *__scontext.__current->context_switch;\
-		}else{\
-		__scontext.__current->context_continue = NULL;\
-	}}
-	
-
-#define s_thread_params(){ __scontext.__current->context_switch = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return;}else{\
-	if(__scontext.__current->context_continue){\
-		memcpy(__builtin_frame_address (0) + 1, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
-		__scontext.__current->stack_size = 0;\
-		goto *__scontext.__current->context_continue;\
-	}}}
-	
-#define s_function_params(){ __scontext.__current->context_switch = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return;}else{\
-	if(__scontext.__current->context_continue){\
-		memcpy(__builtin_frame_address (0) + 1, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
-		__scontext.__current->stack_size = 0;\
-		goto *__scontext.__current->context_continue;\
-	}}}
-	
-
-#define s_yield() {\
-			int __dummy = 10;\
-			void *spl = (void*)&__dummy;\
-			__scontext.__current->stack_size = spl - __builtin_frame_address (0) - 1 ;\
-			memcpy( __scontext.__current->stack_copy, __builtin_frame_address (0) + 1, __scontext.__current->stack_size );\
-			__scontext.__current->context_continue = &&SGET_LABEL();  goto *__scontext.__current->context_switch;  SMAKE_LABEL();	\
-		__scontext.__current->context_continue = NULL;}\
-
-#endif // end AVR_8BIT
-
-
+/* local */
+extern __sthread_context__ __scontext;
+__sthread__ *create_sthread_desc(void);
 void s_sleep__( unsigned int  time_ms);
 void  s_mutex_lock__(struct s_mutex *mutex, int timeout,  int* ret );
 void s_sem_take__( struct s_semaphore *sem, int timeout, int *ret );
