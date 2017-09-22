@@ -76,7 +76,7 @@ void mythread2( int k )
  	s_thread_params();
         while(1){
 		printf("My Thread 2 ********************************\n");
-		s_delay(300);
+		s_sleep(1000);
 		s_thread_yield();
 	}
 }
@@ -144,15 +144,15 @@ void main_app(int k)
 	s_thread_params(); 
 	s_sem_init(&sem, 50);
 
-	create_sthread(stack_thread3, 0, 100, mythread3 );
-	create_sthread(stack_thread1, 0, 10, mythread1 );
+//	create_sthread(stack_thread3, 0, 100, mythread3 );
+//	create_sthread(stack_thread1, 0, 10, mythread1 );
 	create_sthread(stack_thread2, 0, 20, mythread2 );
-	create_sthread(stack_thread4, 0, 60, mythread4 );
-	create_sthread(stack_thread5, 0, 40, mythread5 );
-	create_sthread(stack_thread6, 0, 300, mythread6 );
-	create_sthread(stack_thread7, 0, 70,  mythread7 );
+//	create_sthread(stack_thread4, 0, 60, mythread4 );
+//	create_sthread(stack_thread5, 0, 40, mythread5 );
+//	create_sthread(stack_thread6, 0, 300, mythread6 );
+//	create_sthread(stack_thread7, 0, 70,  mythread7 );
 	while(1){
-		printf("hello main loop\n");
+//		printf("hello main loop\n");
 		s_yield();
 	}
 }

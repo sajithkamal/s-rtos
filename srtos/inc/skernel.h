@@ -203,7 +203,7 @@ __sthread__ *create_sthread_desc(void);
 #endif // end AVR_8BIT
 
 
-void s_delay__( unsigned int  delay_count);
+void s_sleep__( unsigned int  time_ms);
 void  s_mutex_lock__(struct s_mutex *mutex, int timeout,  int* ret );
 void s_sem_take__( struct s_semaphore *sem, int timeout, int *ret );
 #endif

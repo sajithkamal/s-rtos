@@ -23,8 +23,8 @@
  ***********************************/
 
 
-/* DELAY  :- just decrement count */
-#define s_delay(delay_count) {  s_function( s_delay__, delay_count);}
+/* SLEEP  */
+#define s_sleep(time_ms) {  s_function( s_sleep__, time_ms);}
 
 /* Mutex */
 void s_mutex_init( struct s_mutex *mutex );

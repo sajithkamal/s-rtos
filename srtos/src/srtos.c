@@ -20,6 +20,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 
+#ifdef EMU_X86 
+#include <time.h>
+#include <sys/time.h>
+#endif
+
 
  __sthread_context__  __scontext;
 void sthread_main( int k);
@@ -128,13 +133,29 @@ void* create_sthread(unsigned char *stack,  int delay, int priority, thread_entr
 }
 	
 
-unsigned int s_get_ticks(void)
-{
-	/* No timer setup yet */
+#ifdef EMU_X86 
 
-	static unsigned int ticks = 0;
+long long __get_ticks() {
+    	struct timeval tm; 
+   	gettimeofday(&tm, NULL); 
+    	long long ms = tm.tv_sec*1000LL + tm.tv_usec/1000;
+    	return ms;
+}
+#endif
+
+
+#ifdef AVR_8BIT
+long long __get_ticks() {
+	static unsigned long long ticks = 0;
 	ticks++;
 	return ticks;
+}
+#endif
+	
+
+unsigned int s_get_ticks(void)
+{
+	return (unsigned int) __get_ticks();
 }
 
 void s_mutex_init( struct s_mutex *mutex )
@@ -226,16 +247,20 @@ int  s_sem_give( struct s_semaphore *sem )
 	return 0;
 } 
 
-void s_delay__(  unsigned int delay_count)
+void s_sleep__(  unsigned int time_ms)
 {
-#ifdef ATMEL_8BIT
-	volatile unsigned int count = delay_count;
+#ifdef AVR_8BIT
+	volatile unsigned int count = time_ms;
 #else
-	unsigned int count = delay_count;
+	unsigned int count = time_ms;
 #endif
 	s_thread_params();
 	
 	while(count){
+		unsigned int current_ticks = s_get_ticks();
+		while(current_ticks == s_get_ticks()){
+			s_yield();
+		}
 		count--;
 		s_yield();
 	}
