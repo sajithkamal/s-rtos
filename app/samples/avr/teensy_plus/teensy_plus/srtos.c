@@ -173,7 +173,7 @@ void  s_mutex_lock__(struct s_mutex *mutex, int timeout, int* ret )
 
 	while(mutex->lock){
 		if(timeout > 0){
-			unsigned int current_ticks = s_get_ticks();
+			volatile unsigned int current_ticks = s_get_ticks();
 			while(current_ticks == s_get_ticks()){
 				s_yield();
 			}
@@ -216,7 +216,7 @@ void s_sem_take__( struct s_semaphore *sem, int timeout, int *ret )
 	s_thread_params();
 	while(sem->count == 0){
 		if(timeout > 0){
-			unsigned int current_ticks = s_get_ticks();
+			volatile unsigned int current_ticks = s_get_ticks();
 			while(current_ticks == s_get_ticks()){
 				s_yield();
 			}
@@ -257,7 +257,7 @@ void s_sleep__(  unsigned int time_ms)
 	s_thread_params();
 	
 	while(count){
-		unsigned int current_ticks = s_get_ticks();
+		volatile unsigned int current_ticks = s_get_ticks();
 		while(current_ticks == s_get_ticks()){
 			s_yield();
 		}

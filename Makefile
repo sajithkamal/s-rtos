@@ -11,7 +11,7 @@ CFLAGS = $(EMU_X86_CFLAGS)
 endif
 endif
 TARGET ?= a.out
-SRC_DIRS ?= ./srtos/arch/x86 ./srtos/inc  ./srtos/src  ./app
+SRC_DIRS ?=  ./srtos/inc  ./srtos/src  ./app/samples/emu_x86
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS := $(addsuffix .o,$(basename $(SRCS)))

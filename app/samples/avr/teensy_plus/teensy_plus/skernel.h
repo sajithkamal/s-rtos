@@ -43,6 +43,7 @@
 #define SGET_LABEL() _GLABEL2(__LINE__)
 
 
+	
 								
 #define s_function(__func_name, args ...)( {\
 								SMAKE_LABEL(); __scontext.__current->context_continue = &&SGET_LABEL();\
@@ -70,6 +71,7 @@
 								}else{\
 									__scontext.__current->context_continue = NULL;\
 								}})
+								
 
 #define s_thread_params()  { __scontext.__current->context_switch = &&SGET_LABEL(); char _y = 11; if(_y!=11){ SMAKE_LABEL(); return;}else{\
 			if(__scontext.__current->context_continue){\
@@ -126,9 +128,9 @@ struct s_semaphore{
 				void *__func_spl = (void*)&__func_dummy;\
 				__scontext.__current->stack_size = __func_spl - __builtin_frame_address (0) - 1 ;\
 
-#define s_save_stack()	memcpy(__builtin_frame_address (0) + 1, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
+#define s_restore_stack()	memcpy(__builtin_frame_address (0) + 1, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
 
-#define s_restore_stack()	memcpy( __scontext.__current->stack_copy, __builtin_frame_address (0) + 1, __scontext.__current->stack_size );
+#define s_save_stack()	memcpy( __scontext.__current->stack_copy, __builtin_frame_address (0) + 1, __scontext.__current->stack_size );
 
 #endif   // end AVR_8BIT
 
