@@ -76,7 +76,6 @@ void mythread2( int k )
  	s_thread_params();
         while(1){
 		printf("My Thread 2 ********************************\n");
-		s_sleep(500);
 		s_thread_yield();
 	}
 }
@@ -139,20 +138,28 @@ void mythread7( int k )
 	}
 }
 
+//#define  TEST_MUTEX
+//#define TEST_SEMAPHORE
+
 void main_app(int k)
 {
 	s_thread_params(); 
 	s_sem_init(&sem, 50);
 
-	create_sthread(stack_thread3, 0, 100, mythread3 );
 	create_sthread(stack_thread1, 0, 10, mythread1 );
 	create_sthread(stack_thread2, 0, 20, mythread2 );
+	create_sthread(stack_thread3, 0, 100, mythread3 );
+
+#ifdef TEST_MUTEX
 	create_sthread(stack_thread4, 0, 60, mythread4 );
 	create_sthread(stack_thread5, 0, 40, mythread5 );
+#endif
+#ifdef TEST_SEMAPHORE
 	create_sthread(stack_thread6, 0, 300, mythread6 );
 	create_sthread(stack_thread7, 0, 70,  mythread7 );
+#endif
 	while(1){
-		printf("hello main loop\n");
+		s_sleep(5000);
 		s_yield();
 	}
 }
