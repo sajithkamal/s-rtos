@@ -33,13 +33,15 @@ Instructions (Tested in Ubuntu and Mac )
 
 ## Running Sample code in AVR microcontroller.
 Atmel AT90USB1286  Teensy 2.0 ++
-1. Unzip samples/mega-avr/teensy_2.0_++/srtos-atmel.zip. 
+1. git clone https://github.com/sajithkamal/s-rtos.git
 
-2. Compile the project  using atmel studio 7. 
+2. open Atmel studio 7 project at  app/samples/avr/teensy_plus/teensy_plus.atsln 
 
-3. flash the code using teensy flasher application  
+3. Compile.
 
-4. Connect FTDI cable to uart1 
+4. flash the code using teensy flasher application  
+
+5. Connect FTDI cable to uart1 
 
 ## Documentation
 

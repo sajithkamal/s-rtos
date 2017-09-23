@@ -126,9 +126,9 @@ struct s_semaphore{
 				void *__func_spl = (void*)&__func_dummy;\
 				__scontext.__current->stack_size = __func_spl - __builtin_frame_address (0) - 1 ;\
 
-#define s_save_stack()	memcpy(__builtin_frame_address (0) + 1, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
+#define s_restore_stack()	memcpy(__builtin_frame_address (0) + 1, __scontext.__current->stack_copy, __scontext.__current->stack_size );\
 
-#define s_restore_stack()	memcpy( __scontext.__current->stack_copy, __builtin_frame_address (0) + 1, __scontext.__current->stack_size );
+#define s_save_stack()	memcpy( __scontext.__current->stack_copy, __builtin_frame_address (0) + 1, __scontext.__current->stack_size );
 
 #endif   // end AVR_8BIT
 

@@ -42,7 +42,6 @@
 #define _GLABEL2(s) _GLABEL3(s)
 #define SGET_LABEL() _GLABEL2(__LINE__)
 
-
 	
 								
 #define s_function(__func_name, args ...)( {\
